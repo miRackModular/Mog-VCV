@@ -17,6 +17,7 @@ enum PolyMode {
 
 const int NODE_NUM_INS = 2;
 const int NODE_NUM_OUTS = 4;
+constexpr int NUM_CHANNELS = 1; //16
 
 struct OutputRouter;
 
@@ -30,7 +31,7 @@ struct Node{
     int id;
     int state = -2;
     bool bypass = false;
-   	dsp::SchmittTrigger inputTriggers[NODE_NUM_INS][16];
+   	dsp::SchmittTrigger inputTriggers[NODE_NUM_INS][NUM_CHANNELS];
 	dsp::Timer suppressTrigsTimer;
     
     OutputRouter* outputRouter;
@@ -62,7 +63,7 @@ struct Node{
 
 	bool allTrigsLow(){
 		for (int in = 0; in < NODE_NUM_INS; in++)
-			for (int ch = 0; ch < 16; ch++)
+			for (int ch = 0; ch < NUM_CHANNELS; ch++)
 				if(inputTriggers[in][ch].isHigh()) 
 					return false;
 		return true;
@@ -74,7 +75,7 @@ struct Node{
 
 		bool doTrigger = false;   
 		for (int in = 0; in < NODE_NUM_INS; in++){
-			for (int ch = 0; ch < 16; ch++){							
+			for (int ch = 0; ch < NUM_CHANNELS; ch++){							
 				float val = getInput(in)->getVoltage(ch);
 				val = rescale(val, 0.1f, 2.f, 0.f, 1.f);//obey voltage stadards for triggers
 				if(inputTriggers[in][ch].process(val)) doTrigger = true;
@@ -136,8 +137,8 @@ struct Node{
 };
 
 struct OutputRouter{
-    int numChannels = 16;
-    Node* channels[16];
+    int numChannels = NUM_CHANNELS;
+    Node* channels[NUM_CHANNELS];
     
     PolyMode polyMode = RESET_MODE;
     int rotateIndex = -1;
@@ -149,14 +150,14 @@ struct OutputRouter{
 	float cvMin = 0;
 	float cvMax = 10;
 
-	dsp::PulseGenerator retrigPulses[16];
+	dsp::PulseGenerator retrigPulses[NUM_CHANNELS];
 
 
     void init(Output* cv, Output* gate, Output* retrig){
         cvOut = cv;
         gateOut = gate;
 		retrigOut = retrig;
-        for(int i = 0; i < 16; i++) channels[i] = nullptr;
+        for(int i = 0; i < NUM_CHANNELS; i++) channels[i] = nullptr;
     }
 
     void process(float dt, bool bipolar, float attenuversion){
@@ -192,8 +193,8 @@ struct OutputRouter{
 		rotateIndex = -1;
 	}
 	void setChannels(int n){
-		numChannels = n;
-		for(int i = n; i < 16; i++) closeChannel(i);
+		numChannels = std::min(n, NUM_CHANNELS);
+		for(int i = n; i < NUM_CHANNELS; i++) closeChannel(i);
 		if(polyMode == ROTATE_MODE && rotateIndex > numChannels -1) rotateIndex = -1;
 	}
 
@@ -206,7 +207,7 @@ struct OutputRouter{
     }
 
 	void stopNode(Node* node){
-		for(int ch = 0; ch < 16; ch++)
+		for(int ch = 0; ch < NUM_CHANNELS; ch++)
 			if(channels[ch] == node) closeChannel(ch);
 	}
 
@@ -411,7 +412,7 @@ struct ChannelItem : MenuItem {
 	Network* module;
 	Menu* createChildMenu() override {
 		Menu* menu = new Menu;
-		for (int channels = 1; channels <= 16; channels++) {
+		for (int channels = 1; channels <= NUM_CHANNELS; channels++) {
 			ChannelValueItem* item = new ChannelValueItem;
 			if (channels == 1)
 				item->text = "Monophonic";
@@ -560,25 +561,25 @@ struct NetworkWidget : ModuleWidget {
 		ModuleWidget::step();
 	}
 
-	void appendContextMenu(Menu* menu) override {
-		Network* module = dynamic_cast<Network*>(this->module);
+	// void appendContextMenu(Menu* menu) override {
+	// 	Network* module = dynamic_cast<Network*>(this->module);
 
-		menu->addChild(new MenuEntry);
-		menu->addChild(new MenuSeparator());
+	// 	// menu->addChild(new MenuEntry);
+	// 	menu->addChild(new MenuSeparator());
 
-		ChannelItem* channelItem = new ChannelItem;
-		channelItem->text = "Polyphony channels";
-		channelItem->rightText = string::f("%d", module->outputRouter.numChannels) + "  " + RIGHT_ARROW;
-		channelItem->module = module;
-		menu->addChild(channelItem);
+	// 	ChannelItem* channelItem = new ChannelItem;
+	// 	channelItem->text = "Polyphony channels";
+	// 	channelItem->rightText = string::f("%d", module->outputRouter.numChannels) + "  " + RIGHT_ARROW;
+	// 	channelItem->module = module;
+	// 	menu->addChild(channelItem);
 
-		PolyModeItem* polyModeItem = new PolyModeItem;
-		polyModeItem->text = "Polyphony mode";
-		polyModeItem->rightText = RIGHT_ARROW;
-		polyModeItem->module = module;
-		menu->addChild(polyModeItem);
+	// 	PolyModeItem* polyModeItem = new PolyModeItem;
+	// 	polyModeItem->text = "Polyphony mode";
+	// 	polyModeItem->rightText = RIGHT_ARROW;
+	// 	polyModeItem->module = module;
+	// 	menu->addChild(polyModeItem);
 
-	}
+	// }
 
 
 };

@@ -3934,15 +3934,14 @@
      id="layer1"
      inkscape:label="Dark Base"
      style="display:inline"
-     transform="translate(1.8560055,-1.8560014)"
      sodipodi:insensitive="true">
     <rect
        style="display:inline;fill:#1a1a1a;fill-opacity:1;stroke:url(#radialGradient1722);stroke-width:1.88750672;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;enable-background:new"
        id="rect823-3-3"
-       width="33.672493"
-       height="126.6125"
-       x="-0.91225213"
-       y="2.7997451" />
+       width="35.56"
+       height="128.5"
+       x="0"
+       y="0" />
   </g>
   <g
      inkscape:groupmode="layer"

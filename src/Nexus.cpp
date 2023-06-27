@@ -268,6 +268,8 @@ struct NexusWidget : ModuleWidget {
 			light = createLightCentered<KnobLight>(mm2px(Vec(x+2,y+2)), module, Nexus::STEP_LIGHT+stage);
 			light->box.pos.x -= 4;
 			light->box.pos.y -= 4; 
+			light->box.size.x = mm2px(4.45);
+			light->box.size.y = mm2px(4.45); 
 			knobLights[stage] = light;
 			addChild(light);
 
