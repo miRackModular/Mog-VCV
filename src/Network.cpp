@@ -17,7 +17,7 @@ enum PolyMode {
 
 const int NODE_NUM_INS = 2;
 const int NODE_NUM_OUTS = 4;
-constexpr int NUM_CHANNELS = 1; //16
+constexpr int NUM_CHANNELS = PORT_MAX_CHANNELS;
 
 struct OutputRouter;
 
@@ -561,25 +561,22 @@ struct NetworkWidget : ModuleWidget {
 		ModuleWidget::step();
 	}
 
-	// void appendContextMenu(Menu* menu) override {
-	// 	Network* module = dynamic_cast<Network*>(this->module);
+	void appendContextMenu(Menu* menu) override {
+		Network* module = dynamic_cast<Network*>(this->module);
 
-	// 	// menu->addChild(new MenuEntry);
-	// 	menu->addChild(new MenuSeparator());
+		ChannelItem* channelItem = new ChannelItem;
+		channelItem->text = "Polyphony channels";
+		channelItem->rightText = string::f("%d", module->outputRouter.numChannels) + "  " + RIGHT_ARROW;
+		channelItem->module = module;
+		menu->addChild(channelItem);
 
-	// 	ChannelItem* channelItem = new ChannelItem;
-	// 	channelItem->text = "Polyphony channels";
-	// 	channelItem->rightText = string::f("%d", module->outputRouter.numChannels) + "  " + RIGHT_ARROW;
-	// 	channelItem->module = module;
-	// 	menu->addChild(channelItem);
+		PolyModeItem* polyModeItem = new PolyModeItem;
+		polyModeItem->text = "Polyphony mode";
+		polyModeItem->rightText = RIGHT_ARROW;
+		polyModeItem->module = module;
+		menu->addChild(polyModeItem);
 
-	// 	PolyModeItem* polyModeItem = new PolyModeItem;
-	// 	polyModeItem->text = "Polyphony mode";
-	// 	polyModeItem->rightText = RIGHT_ARROW;
-	// 	polyModeItem->module = module;
-	// 	menu->addChild(polyModeItem);
-
-	// }
+	}
 
 
 };
